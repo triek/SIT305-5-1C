@@ -5,5 +5,6 @@ data class Story(
     val title: String,
     val description: String,
     val imageRes: Int,
+    val category: String,
     val relatedStoryIds: List<Int>
 )

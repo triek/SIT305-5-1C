@@ -11,9 +11,11 @@ import com.example.a5_1c.data.Story
 
 class StoryAdapter(
     private val layoutRes: Int,
-    private val stories: List<Story>,
+    stories: List<Story>,
     private val onClick: (Story) -> Unit
 ) : RecyclerView.Adapter<StoryAdapter.StoryViewHolder>() {
+
+    private val items = stories.toMutableList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StoryViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(layoutRes, parent, false)
@@ -21,10 +23,16 @@ class StoryAdapter(
     }
 
     override fun onBindViewHolder(holder: StoryViewHolder, position: Int) {
-        holder.bind(stories[position], onClick)
+        holder.bind(items[position], onClick)
     }
 
-    override fun getItemCount(): Int = stories.size
+    override fun getItemCount(): Int = items.size
+
+    fun submitList(stories: List<Story>) {
+        items.clear()
+        items.addAll(stories)
+        notifyDataSetChanged()
+    }
 
     class StoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val image: ImageView = itemView.findViewById(R.id.storyImage)
