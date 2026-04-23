@@ -82,13 +82,15 @@ object NewsRepository {
         )
     )
 
-    fun featuredMatches(categoryQuery: String = ""): List<Story> = stories
-        .filterByCategory(categoryQuery)
-        .take(4)
+    fun featuredMatches(searchQuery: String = "", category: String = "All"): List<Story> = stories
+        .filterStories(searchQuery, category)
 
-    fun latestNews(categoryQuery: String = ""): List<Story> = stories
-        .drop(1)
-        .filterByCategory(categoryQuery)
+    fun latestNews(searchQuery: String = "", category: String = "All"): List<Story> = stories
+        .filterStories(searchQuery, category)
+
+    fun categories(): List<String> = listOf("All") + stories
+        .map { it.category }
+        .distinct()
 
     fun storyById(id: Int): Story? = stories.firstOrNull { it.id == id }
 
@@ -126,8 +128,17 @@ object NewsRepository {
         return raw.mapNotNull { it.toIntOrNull() }.toSet()
     }
 
-    private fun List<Story>.filterByCategory(query: String): List<Story> {
-        if (query.isBlank()) return this
-        return filter { it.category.contains(query.trim(), ignoreCase = true) }
+    private fun List<Story>.filterStories(searchQuery: String, category: String): List<Story> {
+        val normalizedSearchQuery = searchQuery.trim()
+        return filter { story ->
+            val categoryMatch = category.equals("All", ignoreCase = true) ||
+                story.category.equals(category, ignoreCase = true)
+            val searchMatch = normalizedSearchQuery.isBlank() ||
+                story.title.contains(normalizedSearchQuery, ignoreCase = true) ||
+                story.description.contains(normalizedSearchQuery, ignoreCase = true) ||
+                story.category.contains(normalizedSearchQuery, ignoreCase = true)
+
+            categoryMatch && searchMatch
+        }
     }
 }
